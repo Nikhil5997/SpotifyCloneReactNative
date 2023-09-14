@@ -1,82 +1,59 @@
-import React from "react";
-import { StatusBar } from "expo-status-bar";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Home from "./Components/Home";
-import Search from "./Components/Search";
-import GetStarted from "./Components/GetStarted";
-import Gender from "./Components/Gender"
-import Name from "./Components/Name";
-import SelectArtist from "./Components/SelectArtist"
-import LandingPage from "./Components/LandingPage";
-import GreatPick from "./Components/GreatPick";
+import React, { useRef } from 'react';
+import { StyleSheet, View, PanResponder, Animated } from 'react-native';
 
-const Stack = createNativeStackNavigator();
+export default function App() {
+  const pan = useRef(new Animated.ValueXY()).current;
 
-const App = () => {
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: Animated.event(
+      [
+        null,
+        {
+          dx: pan.x, 
+          dy: pan.y, 
+        },
+      ],
+      { useNativeDriver: false }
+    ),
+    onPanResponderRelease: () => {
+      pan.flattenOffset(); // This merges the offset value into the base value and resets the offset to zero.
+    },
+    onPanResponderGrant: () => {
+      pan.setOffset({
+        x: pan.x._value,
+        y: pan.y._value,
+      });
+      pan.setValue({ x: 0, y: 0 }); // Reset the value to use the offset as the starting position.
+    },
+  });
+
   return (
-    <NavigationContainer>
-      <StatusBar style="light" />
-
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "#191414",
-
-            // borderBottomWidth: 2, // Set the border width
-            // borderBottomColor: "#000",
+    <View style={styles.container}>
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={[
+          styles.circle,
+          {
+            transform: [{ translateX: pan.x }, { translateY: pan.y }],
           },
-          headerTitleStyle: {
-            fontSize: 20,
-          },
-          headerTitleAlign: "center",
-
-          headerTintColor: "#FFFFFF",
-        }}
-      >
-        <Stack.Screen
-          name="Home"
-          component={Home}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Search"
-          component={Search}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="GetStarted"
-          component={GetStarted}
-          options={{ title: "Create account" }}
-        />
-          <Stack.Screen
-          name="Gender"
-          component={Gender}
-          options={{ title: "Create account" }}
-        />
-         <Stack.Screen
-          name="Name"
-          component={Name}
-          options={{ title: "Create account" }}
-        />
-         <Stack.Screen
-          name="SelectArtist"
-          component={SelectArtist}
-          options={{ headerShown: false }}
-        />
-          <Stack.Screen
-          name="LandingPage"
-          component={LandingPage}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="GreatPick"
-          component={GreatPick}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+        ]}
+      />
+    </View>
   );
-};
+}
 
-export default App;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circle: {
+    width: 75,
+    height: 75,
+    borderRadius: 50,
+    backgroundColor: 'blue',
+  },
+});
